@@ -1,0 +1,11 @@
+{
+  "runs_backtested": 1,
+  "total_positions": 30,
+  "global_mean_residual": -0.0855,
+  "global_mean_abs_residual": 0.1885,
+  "global_hit_rate": 0.567,
+  "global_rank_corr": 0.188,
+  "global_mean_brier": 1.1182,
+  "global_mean_realized": 0.0129,
+  "global_mean_ev": 0.0984
+}

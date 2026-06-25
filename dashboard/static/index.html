@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Portfolio Research Dashboard</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">◉</div>
+          <div>
+            <h1>AI Portfolio</h1>
+            <p>Trading cockpit</p>
+          </div>
+        </div>
+
+        <label class="field">
+          <span>Pipeline run</span>
+          <select id="runSelect"></select>
+        </label>
+
+        <label class="field">
+          <span>Chart range</span>
+          <select id="periodSelect">
+            <option value="1mo">1 month</option>
+            <option value="3mo" selected>3 months</option>
+            <option value="6mo">6 months</option>
+            <option value="1y">1 year</option>
+          </select>
+        </label>
+
+        <label class="toggle-row">
+          <input id="liveToggle" type="checkbox" checked />
+          <span>Live prices</span>
+        </label>
+
+        <button id="refreshBtn" class="primary-btn">Refresh</button>
+
+        <nav class="nav" id="nav">
+          <button class="active" data-view="overview">Overview</button>
+          <button data-view="market">Live Market</button>
+          <button data-view="holdings">Holdings</button>
+          <button data-view="decisions">Decisions</button>
+          <button data-view="rebalance">Rebalance</button>
+          <button data-view="scenarios">Scenarios</button>
+          <button data-view="monitor">Monitor & Sources</button>
+        </nav>
+
+        <div class="rules" id="rulesBox"></div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Live Trading Dashboard</p>
+            <h2>Portfolio Research Terminal</h2>
+            <p id="statusLine" class="muted">Loading portfolio data…</p>
+          </div>
+          <div class="clock">
+            <span id="clockTime"></span>
+            <small id="quoteTime"></small>
+          </div>
+        </header>
+
+        <section class="kpis" id="kpiGrid"></section>
+
+        <section class="brief" id="briefPanel"></section>
+
+        <section class="view active" id="view-overview">
+          <div class="run-ribbon" id="runRibbon"></div>
+
+          <div class="grid dossier">
+            <article class="panel thesis-panel">
+              <div class="section-kicker">Most Recent Run</div>
+              <div id="heroPanel"></div>
+            </article>
+            <article class="panel stat-rail-panel">
+              <div id="heroRail"></div>
+            </article>
+          </div>
+
+          <div class="grid two">
+            <article class="panel">
+              <div class="panel-head">
+                <h3>Findings and Actions</h3>
+                <span class="pill">selected run</span>
+              </div>
+              <div id="findingsGrid" class="cards"></div>
+            </article>
+            <article class="panel">
+              <div class="panel-head">
+                <h3>Pipeline Burn</h3>
+                <span class="pill">runtime and tokens</span>
+              </div>
+              <div id="stageBurn"></div>
+            </article>
+          </div>
+
+          <div class="grid two">
+            <article class="panel">
+              <div class="panel-head">
+                <h3>Portfolio vs Benchmark</h3>
+                <span class="pill">indexed</span>
+              </div>
+              <div id="portfolioChart" class="chart tall"></div>
+            </article>
+            <article class="panel">
+              <div class="panel-head">
+                <h3>Sector Allocation</h3>
+                <span class="pill">target</span>
+              </div>
+              <div id="sectorChart" class="chart tall"></div>
+            </article>
+          </div>
+
+          <div class="grid three">
+            <article class="panel">
+              <h3>Top EV Holdings</h3>
+              <div id="topEvTable"></div>
+            </article>
+            <article class="panel">
+              <h3>Largest Drift</h3>
+              <div id="driftTable"></div>
+            </article>
+            <article class="panel">
+              <h3>Recent Decisions</h3>
+              <div id="recentDecisions"></div>
+            </article>
+          </div>
+
+          <article class="panel">
+            <div class="panel-head">
+              <h3>Run Library</h3>
+              <span class="pill">all pipeline runs</span>
+            </div>
+            <div id="runLibrary"></div>
+          </article>
+        </section>
+
+        <section class="view" id="view-market">
+          <article class="panel">
+            <div class="panel-head">
+              <h3>Live Prices and Allocation Drift</h3>
+              <input id="marketSearch" class="search" placeholder="Search positions" />
+            </div>
+            <div id="marketTable"></div>
+          </article>
+          <article class="panel">
+            <div class="panel-head">
+              <h3>Position Price Graphs</h3>
+              <select id="chartSymbols" multiple></select>
+            </div>
+            <div id="priceChart" class="chart"></div>
+          </article>
+        </section>
+
+        <section class="view" id="view-holdings">
+          <article class="panel">
+            <div class="panel-head">
+              <h3>Holdings Detail</h3>
+              <div class="filters">
+                <select id="sectorFilter"></select>
+                <select id="convictionFilter"></select>
+                <input id="holdingSearch" class="search" placeholder="Search thesis" />
+              </div>
+            </div>
+            <div id="holdingsList" class="cards"></div>
+          </article>
+        </section>
+
+        <section class="view" id="view-decisions">
+          <article class="panel">
+            <div class="panel-head">
+              <h3>Complete Model Decision Ledger</h3>
+              <div class="filters">
+                <select id="decisionAction"></select>
+                <select id="decisionRun"></select>
+                <input id="decisionSearch" class="search" placeholder="Search rationale" />
+              </div>
+            </div>
+            <div id="decisionTable"></div>
+            <div id="decisionCards" class="cards"></div>
+          </article>
+        </section>
+
+        <section class="view" id="view-rebalance">
+          <div class="grid two">
+            <article class="panel">
+              <h3>Rebalance Summary</h3>
+              <div id="rebalanceKpis" class="mini-kpis"></div>
+              <p id="rebalanceNotes" class="note"></p>
+            </article>
+            <article class="panel">
+              <h3>Decision Mix</h3>
+              <div id="rebalanceChart" class="chart small"></div>
+            </article>
+          </div>
+          <article class="panel">
+            <h3>Add / Remove / Reweight Instructions</h3>
+            <div id="rebalanceTable"></div>
+          </article>
+        </section>
+
+        <section class="view" id="view-scenarios">
+          <article class="panel">
+            <div class="panel-head">
+              <h3>Scenario Models</h3>
+              <select id="scenarioSelect"></select>
+            </div>
+            <div id="scenarioTable"></div>
+          </article>
+          <div class="grid two">
+            <article class="panel">
+              <h3 id="scenarioTitle">Scenario Detail</h3>
+              <div id="scenarioChart" class="chart small"></div>
+              <div id="scenarioCases"></div>
+            </article>
+            <article class="panel">
+              <h3>Bull / Bear Debate</h3>
+              <div id="debateBox"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="view" id="view-monitor">
+          <div class="grid two">
+            <article class="panel">
+              <h3>Thesis Monitor</h3>
+              <div id="monitorList" class="cards"></div>
+            </article>
+            <article class="panel">
+              <h3>Pipeline and Source Health</h3>
+              <div id="sourceHealth"></div>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
