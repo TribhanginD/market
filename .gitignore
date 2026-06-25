@@ -30,3 +30,4 @@ storage/backtest_results/
 dist/
 build/
 requirements.lock
+.vercel

@@ -22,9 +22,13 @@ DB_FILE = STORAGE_DIR / "portfolio.sqlite3"
 CACHE_DIR = BASE_DIR / ".cache"
 SOURCE_PAYLOADS_DIR = STORAGE_DIR / "source_payloads"
 
-# Ensure directories exist
+# Ensure directories exist (best-effort — read-only deployments like the
+# Vercel demo function ship these dirs pre-built and can't mkdir at runtime)
 for d in [STORAGE_DIR, PIPELINE_RUNS_DIR, CACHE_DIR, SOURCE_PAYLOADS_DIR]:
-    d.mkdir(parents=True, exist_ok=True)
+    try:
+        d.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        pass
 
 # ─────────────────────────────────────────────
 # Claude API
@@ -310,7 +314,10 @@ NIFTYINDICES_RESEARCH_PAPERS_URL = os.getenv("NIFTYINDICES_RESEARCH_PAPERS_URL",
 NIFTYINDICES_DAILY_REPORTS_URL = os.getenv("NIFTYINDICES_DAILY_REPORTS_URL", "https://www.niftyindices.com/reports/daily-reports")
 NIFTYINDICES_MONTHLY_REPORTS_URL = os.getenv("NIFTYINDICES_MONTHLY_REPORTS_URL", "https://www.niftyindices.com/reports/monthly-reports")
 REPORTS_CACHE_DIR = STORAGE_DIR / "reports_cache"
-REPORTS_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+try:
+    REPORTS_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+except OSError:
+    pass
 CACHE_TTL_REPORTS = int(os.getenv("CACHE_TTL_REPORTS", str(12 * 3600)))  # 12 hours
 REPORTS_MAX_PER_CATEGORY = int(os.getenv("REPORTS_MAX_PER_CATEGORY", "5"))
 REPORTS_TEXT_EXCERPT_CHARS = int(os.getenv("REPORTS_TEXT_EXCERPT_CHARS", "2000"))

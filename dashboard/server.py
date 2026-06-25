@@ -19,17 +19,11 @@ from datetime import datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
-import pandas as pd
-
-
 import config
-from data.fetcher import get_live_prices_batch
-from data.nifty500 import _yf_symbol
 
-try:
-    import yfinance as yf
-except Exception:  # pragma: no cover
-    yf = None
+# pandas/yfinance/data.fetcher are heavy (pull in numpy, lxml, etc.) and only
+# needed for live quotes / history — import lazily so the demo deploy (which
+# always runs with include_live=False) stays under serverless bundle limits.
 
 
 ROOT = Path(__file__).parent
@@ -229,6 +223,9 @@ def load_db_counts() -> dict:
 
 
 def live_quotes(symbols: list[str]) -> dict:
+    from data.fetcher import get_live_prices_batch
+    from data.nifty500 import _yf_symbol
+
     clean = [s.strip().upper() for s in symbols if s.strip()]
     yf_symbols = [_yf_symbol(s) for s in clean]
     raw = get_live_prices_batch(yf_symbols)
@@ -314,8 +311,15 @@ def flatten_trades(trades_log: list[dict]) -> list[dict]:
 
 
 def history_payload(symbols: list[str], period: str) -> dict:
-    if yf is None or not symbols:
+    if not symbols:
         return {"dates": [], "series": []}
+    import pandas as pd
+    try:
+        import yfinance as yf
+    except Exception:  # pragma: no cover
+        return {"dates": [], "series": []}
+    from data.nifty500 import _yf_symbol
+
     clean = [s.strip().upper() for s in symbols if s.strip()]
     tickers = [_yf_symbol(s) for s in clean]
     if config.BENCHMARK_SYMBOL not in tickers:
